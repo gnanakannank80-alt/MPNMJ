@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MPNMJEC Attendance</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --secondary: #10B981;
+            --bg-color: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --error: #EF4444;
+            --border: #E5E7EB;
+            --nav-bg: #FFFFFF;
+        }
+
+        [data-theme="dark"] {
+            --primary: #6366F1;
+            --primary-light: #4F46E5;
+            --bg-color: #111827;
+            --card-bg: #1F2937;
+            --text-main: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --border: #374151;
+            --nav-bg: #1F2937;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+
+        .hidden { display: none !important; }
+        .page { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow-y: auto; background: var(--bg-color); z-index: 10; padding-bottom: 70px; }
+        
+        /* Typography */
+        h1, h2, h3 { color: var(--text-main); font-weight: 600; }
+        p { color: var(--text-muted); }
+        
+        /* Splash Screen */
+        #splash { z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; }
+        #splash .logo-container { width: 120px; height: 120px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: popin 0.8s ease-out forwards; }
+        #splash i { font-size: 60px; color: var(--primary); }
+        #splash h2 { color: white; text-align: center; animation: fadein 1s ease-out 0.3s forwards; opacity: 0; padding: 0 20px; }
+        
+        @keyframes popin { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadein { to { opacity: 1; } }
+
+        /* Login */
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 1.2rem; margin-bottom: 5px; color: white;}
+        .header h2 { font-size: 0.8rem; color: #E0E7FF; font-weight: 400;}
+
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* Role Selection */
+        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .role-btn { background: transparent; border: 2px solid var(--primary); color: var(--text-main); padding: 15px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .role-btn i { font-size: 24px; color: var(--primary); }
+        .role-btn.active { background: var(--primary); color: white; }
+        .role-btn.active i { color: white; }
+
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-color); color: var(--text-main); font-size: 1rem; outline: none; }
+        .form-control:focus { border-color: var(--primary); }
+        .btn { display: block; width: 100%; padding: 12px; background: var(--primary); color: white; text-align: center; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; margin-top: 10px;}
+        .btn:active { transform: scale(0.98); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+
+        .error-msg { color: var(--error); font-size: 0.85rem; margin-top: 5px; display: none; text-align: center; }
+
+        /* Dashboard Grid Components */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .action-card { background: var(--card-bg); padding: 20px 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid var(--border); }
+        .action-card i { font-size: 2rem; color: var(--primary); margin-bottom: 10px; }
+        .action-card span { display: block; font-weight: 600; font-size: 0.9rem; }
+
+        /* Table Styles */
+        .table-responsive { overflow-x: auto; margin-top: 15px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { background: var(--primary); color: white; }
+        .table-input { width: 60px; padding: 5px; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border); z-index: 50; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); cursor: pointer; text-decoration: none; padding: 5px 15px; border-radius: 10px;}
+        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+        .nav-item span { font-size: 0.75rem; font-weight: 500; }
+        .nav-item.active { color: var(--primary); background: var(--primary-light); background-opacity: 0.1; }
+
+        /* Progress Circle */
+        .progress-container { display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        .circular-chart { display: block; margin: 10px auto; max-width: 150px; max-height: 150px; }
+        .circle-bg { fill: none; stroke: var(--border); stroke-width: 3.8; }
+        .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; animation: progress 1s ease-out forwards; }
+        .green-color { stroke: var(--secondary); }
+        .percentage { fill: var(--text-main); font-family: sans-serif; font-size: 0.5em; text-anchor: middle; font-weight: bold; }
+        
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; color: white;}
+        .bg-present { background: var(--secondary); }
+        .bg-absent { background: var(--error); }
+        .bg-od { background: #F59E0B; }
+
+        /* Toggle switch */
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; position: relative;}
+        .close-modal { position: absolute; right: 20px; top: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+        
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .mb-3 { margin-bottom: 15px; }
+        .mt-3 { margin-top: 15px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Splash Screen -->
+    <div id="splash" class="page">
+        <div class="logo-container">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <h2>MPNMJEC Attendance Sys</h2>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="page hidden" style="z-index: 9;">
+        <div class="header">
+            <h1>M.P. NACHIMUTHU M. JAGANADHAN ENGINEERING COLLEGE</h1>
+            <h2>Erode-Chennimalai Rd, Erode, Tamil Nadu 638112</h2>
+        </div>
+        
+        <div class="container">
+            <div class="card">
+                <h3 style="text-align:center; margin-bottom:10px;">Login</h3>
+                <p style="text-align:center; margin-bottom:20px;">What is your role?</p>
+                
+                <div class="role-grid" id="roleSelection">
+                    <div class="role-btn active" data-role="Student">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <span>Student</span>
+                    </div>
+                    <div class="role-btn" data-role="Staff">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        <span>Staff</span>
+                    </div>
+                    <div class="role-btn" data-role="HOD">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <span>HOD</span>
+                    </div>
+                    <div class="role-btn" data-role="Principal">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span>Principal</span>
+                    </div>
+                </div>
+
+                <div id="loginForm" class="mt-3">
+                    <div class="form-group">
+                        <label id="lblUsername">Register Number</label>
+                        <input type="text" id="txtUsername" class="form-control" placeholder="Enter Registration Number">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="txtPassword" class="form-control" placeholder="Enter Password">
+                    </div>
+                    <p class="error-msg" id="loginError">Invalid credentials</p>
+                    <button class="btn" onclick="app.login()">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Layout (Hidden by default) -->
+    <div id="mainApp" class="hidden">
+        
+        <!-- Header -->
+        <div class="header" style="border-radius: 0 0 10px 10px; padding: 15px;">
+            <h1 style="font-size: 1rem;">MPNMJEC</h1>
+            <h2 id="userWelcome" style="margin-top:5px; font-weight:600; font-size:1rem; color:white;">Welcome</h2>
+        </div>
+
+        <!-- Dashboard View (Home) -->
+        <div id="viewHome" class="container" style="padding-bottom: 80px;">
+            <!-- Rendered by JS based on role -->
+            <div id="dashboardContent"></div>
+        </div>
+
+        <!-- Reports View -->
+        <div id="viewReport" class="container hidden" style="padding-bottom: 80px;">
+            <h2 class="mb-3">Absentees Report</h2>
+            <div class="card">
+                <div class="flex-between mb-3">
+                    <h3>Today's Absentees</h3>
+                    <span id="reportDate" class="text-muted"></span>
+                </div>
+                <!-- Controls to filter class -->
+                <div class="form-group">
+                    <select id="reportClassFilter" class="form-control" onchange="app.renderReportTable()">
+                        <option value="CSE 2nd Year">CSE 2nd Year</option>
+                        <option value="CSE 3rd Year">CSE 3rd Year</option>
+                        <option value="CSE 4th Year">CSE 4th Year</option>
+                    </select>
+                </div>
+                <div class="table-responsive" id="reportTableContainer">
+                    <table id="reportTable">
+                        <thead><tr><th>ID</th><th>Name</th><th>Status</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                <h3 class="mt-3">Email Report</h3>
+                <div class="form-group mt-3">
+                    <label>From Email (Auto-filled)</label>
+                    <input type="email" id="fromEmail" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>To Email</label>
+                    <input type="email" id="toEmail" class="form-control" placeholder="hod@example.com">
+                </div>
+                <button class="btn" onclick="app.sendEmailReport()"><i class="fa-solid fa-paper-plane"></i> Send via Gmail App</button>
+            </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="viewSettings" class="container hidden" style="padding-bottom: 80px;">
+            <h2 class="mb-3">Settings</h2>
+            <div class="card">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="profName" class="form-control" readonly>
+                </div>
+                <div class="form-group" id="grpRegNo">
+                    <label>Register Number / Username</label>
+                    <input type="text" id="profId" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" id="profDept" class="form-control" value="CSE" readonly>
+                </div>
+                <div class="form-group" id="grpYear">
+                    <label>Year</label>
+                    <input type="text" id="profYear" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Gmail ID</label>
+                    <input type="email" id="profEmail" class="form-control" placeholder="Enter your email">
+                </div>
+                <div class="flex-between mb-3 mt-3">
+                    <label style="font-weight:600;">Dark Mode</label>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" onchange="app.toggleTheme()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <button class="btn btn-outline" style="margin-bottom:10px;" onclick="app.saveProfile()">Save Profile</button>
+                <button class="btn" style="background-color: var(--error);" onclick="app.logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="app.switchTab('Home')">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="app.switchTab('Report')">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Report</span>
+            </div>
+            <div class="nav-item" onclick="app.switchTab('Settings')">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Container for Details (Used across app) -->
+    <div id="dataModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="app.closeModal()">&times;</span>
+            <h2 id="modalTitle" class="mb-3">Title</h2>
+            <div id="modalBody">
+                <!-- Dynamic Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // System Data
+        const DB = {
+            roles: {
+                student: { defaultPass: "cc2cse" },
+                staff: { 
+                    pass: "235689", 
+                    users: ["d.suganthi", "s.raghul", "n.ashokkumar", "k.n.sivakumar", "b.yuvaraj", "k.singaravelan", "s.dineshkumar", "a.nooralshaba", "k.r.mohanapriya"]
+                },
+                hod: { user: "k.n.sivakumar", pass: "hod@cse" },
+                principal: { user: "dr.ramesh", pass: "mpnmj@cse" }
+            },
+            students: {
+                "CSE 2nd Year": [
+                    { id: "731724104001", name: "ABBU G YUVARAJ" }, { id: "731724104002", name: "ABINAYA S" },
+                    { id: "731724104003", name: "ABINAYA V" }, { id: "731724104004", name: "ARAVINDHAN K" },
+                    { id: "731724104005", name: "ARCHANA J" }, { id: "731724104006", name: "AYESHA REENA S" },
+                    { id: "731724104007", name: "BHARANI P" }, { id: "731724104009", name: "DEEPA K" },
+                    { id: "731724104010", name: "DEEPIKA K" }, { id: "731724104011", name: "DEVADHARSHINI B" },
+                    { id: "731724104012", name: "ELAMATHI V R" }, { id: "731724104013", name: "GAYATHRI K" },
+                    { id: "731724104014", name: "GNANAKANNAN K" }, { id: "731724104015", name: "GOKUL PRASAD K" },
+                    { id: "731724104016", name: "GUNARANJANI A" }, { id: "731724104017", name: "GUNASREE S" },
+                    { id: "731724104018", name: "INDHUMATHI K" }, { id: "731724104019", name: "JAYAKUMAR J" },
+                    { id: "731724104020", name: "KAVINPRIYAN M" }, { id: "731724104021", name: "KAVITHA P" },
+                    { id: "731724104022", name: "KAVYA K" }, { id: "731724104023", name: "KRISHNASAMY K" },
+                    { id: "731724104024", name: "MAHALAKSHMI K" }, { id: "731724104025", name: "MALAR VIZHI N" },
+                    { id: "731724104026", name: "MUTHULA E" }, { id: "731724104027", name: "MONIKA S" },
+                    { id: "731724104028", name: "MYTHILI M" }, { id: "731724104029", name: "NANDHINI R" },
+                    { id: "731724104030", name: "PAVITHRA B" }, { id: "731724104031", name: "PONRAJ P" },
+                    { id: "731724104032", name: "POOJASHREE P" }, { id: "731724104033", name: "PRAKASH V" },
+                    { id: "731724104034", name: "PRIYADHARSHINI C" }, { id: "731724104035", name: "SABANA S" },
+                    { id: "731724104036", name: "SABARISH P" }, { id: "731724104037", name: "SABARISHANKAR K" },
+                    { id: "731724104038", name: "SADHISH P" }, { id: "731724104039", name: "SATHISH M" },
+                    { id: "731724104040", name: "SAUBAL B" }, { id: "731724104042", name: "SHARMILA A" },
+                    { id: "731724104043", name: "SHOBANA B S" }, { id: "731724104044", name: "SRIJA V" },
+                    { id: "731724104045", name: "SUTHESH M" }, { id: "731724104046", name: "THAVAGAR T" },
+                    { id: "731724104047", name: "THENNARASU G" }, { id: "731724104048", name: "VAASHINI S" },
+                    { id: "731724104049", name: "VIDHYA V" }, { id: "731724104050", name: "VIMAL S" },
+                    { id: "731724104051", name: "YAZHINI" }, { id: "731724104052", name: "YOGESHWARI G" },
+                    { id: "731724104053", name: "YUKESH M" }
+                ],
+                "CSE 3rd Year": [
+                    { id: "731723104001", name: "YUVARAJ" }, { id: "731723104002", name: "ABINA" },
+                    { id: "731723104003", name: "ANAYA V" }, { id: "731723104004", name: "ARAHAN" }
+                ],
+                "CSE 4th Year": [
+                    { id: "731722104001", name: "ROJA" }, { id: "731722104002", name: "POOJA" },
+                    { id: "731722104003", name: "RAJU" }, { id: "731722104004", name: "MANHA" }
+                ]
+            }
+        };
+
+        // App State
+        let state = {
+            userRole: '',
+            userId: '',
+            userName: '',
+            userYear: '',
+            email: ''
+        };
+
+        const app = {
+            init() {
+                // Splash screen 
+                setTimeout(() => {
+                    document.getElementById('splash').classList.add('hidden');
+                    if(localStorage.getItem('mpnmjec_user')) {
+                        let savedData = JSON.parse(localStorage.getItem('mpnmjec_user'));
+                        state = savedData;
+                        app.loadApp();
+                    } else {
+                        document.getElementById('loginPage').classList.remove('hidden');
+                    }
+                }, 2500);
+
+                // Setup Role Toggle
+                document.querySelectorAll('.role-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        let role = this.getAttribute('data-role');
+                        let lbl = document.getElementById('lblUsername');
+                        let txt = document.getElementById('txtUsername');
+                        if(role === 'Student') { lbl.innerText = "Register Number"; txt.placeholder = "Enter Registration Number"; }
+                        else { lbl.innerText = "Username"; txt.placeholder = "Enter Username"; }
+                        document.getElementById('loginError').style.display = 'none';
+                    });
+                });
+
+                // Load initial Theme
+                if(localStorage.getItem('theme') === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    document.getElementById('themeToggle').checked = true;
+                }
+                
+                // Set Report Date
+                document.getElementById('reportDate').innerText = new Date().toLocaleDateString();
+            },
+
+            login() {
+                let role = document.querySelector('.role-btn.active').getAttribute('data-role');
+                let user = document.getElementById('txtUsername').value.trim().toLowerCase();
+                let pass = document.getElementById('txtPassword').value.trim();
+                let err = document.getElementById('loginError');
+                
+                err.style.display = 'none';
+                if(!user || !pass) { err.innerText = "Please fill all fields"; err.style.display = 'block'; return; }
+
+                let valid = false;
+                let foundName = user;
+                let foundYear = '';
+
+                if(role === 'Student') {
+                    if(pass === DB.roles.student.defaultPass) {
+                        for(let year in DB.students) {
+                            let s = DB.students[year].find(st => st.id === user);
+                            if(s) { valid = true; foundName = s.name; foundYear = year; break; }
+                        }
+                    }
+                } else if(role === 'Staff') {
+                    if(pass === DB.roles.staff.pass && DB.roles.staff.users.includes(user)) {
+                        valid = true; foundName = user;
+                    }
+                } else if(role === 'HOD') {
+                    if(pass === DB.roles.hod.pass && user === DB.roles.hod.user) { valid = true; }
+                } else if(role === 'Principal') {
+                    if(pass === DB.roles.principal.pass && user === DB.roles.principal.user) { valid = true; }
+                }
+
+                if(valid) {
+                    state = { userRole: role, userId: user, userName: foundName, userYear: foundYear, email: '' };
+                    localStorage.setItem('mpnmjec_user', JSON.stringify(state));
+                    app.loadApp();
+                } else {
+                    err.innerText = "Invalid credentials"; err.style.display = 'block';
+                }
+            },
+
+            logout() {
+                localStorage.removeItem('mpnmjec_user');
+                location.reload();
+            },
+
+            loadApp() {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                
+                document.getElementById('userWelcome').innerText = `${state.userName} (${state.userRole})`;
+                app.switchTab('Home');
+                app.setupSettings();
+            },
+
+            switchTab(tab) {
+                document.querySelectorAll('.bottom-nav .nav-item').forEach(el => {
+                    el.classList.remove('active');
+                    if(el.innerText.includes(tab)) el.classList.add('active');
+                });
+                
+                ['viewHome', 'viewReport', 'viewSettings'].forEach(v => document.getElementById(v).classList.add('hidden'));
+                document.getElementById(`view${tab}`).classList.remove('hidden');
+
+                if(tab === 'Home') this.renderDashboard();
+                if(tab === 'Report') this.renderReportTable();
+            },
+
+            // ================= DASHBOARDS =================
+            renderDashboard() {
+                const map = {
+                    'Student': this.renderStudentDash,
+                    'Staff': this.renderStaffDash,
+                    'HOD': this.renderHODDash,
+                    'Principal': this.renderPrincipalDash
+                };
+                map[state.userRole].call(this);
+            },
+
+            renderStudentDash() {
+                let html = `
+                    <div class="card mb-3 text-center">
+                        <h2>${state.userName}</h2>
+                        <p>${state.userId} | ${state.userYear} | CSE</p>
+                    </div>
+                    
+                    <h3 class="mb-3">My Dashboard</h3>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="app.showStudentAttendance()">
+                            <i class="fa-solid fa-chart-pie"></i><span>Attendance</span>
+                        </div>
+                        <div class="action-card" onclick="app.showClassTimetable('${state.userYear}')">
+                            <i class="fa-solid fa-calendar-days"></i><span>Time Table</span>
+                        </div>
+                        <div class="action-card" onclick="app.showStudentMarks('1')">
+                            <i class="fa-solid fa-file-pen"></i><span>IAT-1</span>
+                        </div>
+                        <div class="action-card" onclick="app.showStudentMarks('2')">
+                            <i class="fa-solid fa-file-pen"></i><span>IAT-2</span>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('dashboardContent').innerHTML = html;
+            },
+
+            renderStaffDash() {
+                document.getElementById('dashboardContent').innerHTML = `
+                    <div class="card mb-3">
+                        <h2>Staff Dashboard</h2>
+                        <p>Welcome, ${state.userName}</p>
+                    </div>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="app.staffAttendancePage()">
+                            <i class="fa-solid fa-clipboard-user"></i><span>Take Attendance</span>
+                        </div>
+                        <div class="action-card" onclick="app.showAllTimetables()">
+                            <i class="fa-solid fa-calendar-days"></i><span>View Time Table</span>
+                        </div>
+                        <div class="action-card" onclick="app.staffIATPage('1')">
+                            <i class="fa-solid fa-pen-to-square"></i><span>Enter IAT-1 Marks</span>
+                        </div>
+                        <div class="action-card" onclick="app.staffIATPage('2')">
+                            <i class="fa-solid fa-pen-to-square"></i><span>Enter IAT-2 Marks</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderHODDash() {
+                document.getElementById('dashboardContent').innerHTML = `
+                    <div class="card mb-3">
+                        <h2>HOD Dashboard</h2>
+                        <p>Welcome, Head of Department</p>
+                    </div>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="app.hodAttendancePage()">
+                            <i class="fa-solid fa-chart-line"></i><span>Attendance Overview</span>
+                        </div>
+                        <div class="action-card" onclick="app.updateTimetablePage()">
+                            <i class="fa-solid fa-calendar-plus"></i><span>Update Time Table</span>
+                        </div>
+                        <div class="action-card" onclick="app.hodIatOverview()">
+                            <i class="fa-solid fa-ranking-star"></i><span>IAT Overall Report</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderPrincipalDash() {
+                 document.getElementById('dashboardContent').innerHTML = `
+                    <div class="card mb-3">
+                        <h2>Principal Dashboard</h2>
+                        <p>Welcome, Respected Principal</p>
+                    </div>
+                    <div class="action-grid">
+                        <div class="action-card" onclick="app.princiAttendancePage()">
+                            <i class="fa-solid fa-eye"></i><span>View All Attendance</span>
+                        </div>
+                        <div class="action-card" onclick="app.showAllTimetables()">
+                            <i class="fa-solid fa-calendar-days"></i><span>View Time Table</span>
+                        </div>
+                        <div class="action-card" onclick="app.hodIatOverview()">
+                            <i class="fa-solid fa-file-invoice"></i><span>View IAT Reports</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ================= STUDENT SPECIFIC =================
+            showStudentAttendance() {
+                // Mock logic for attendance percenatge, stored data ideally
+                let total = 90; let attended = 78; let od = 3; let abs = total - attended - od;
+                let perc = Math.round(((attended+od)/total)*100);
+                
+                let html = `
+                    <div class="progress-container">
+                        <svg viewBox="0 0 36 36" class="circular-chart green-color">
+                          <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                          <path class="circle" stroke-dasharray="${perc}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                          <text x="18" y="20.35" class="percentage">${perc}%</text>
+                        </svg>
+                        <p style="text-align:center;">Total Working Days: ${total}</p>
+                    </div>
+                    <hr class="mb-3" style="border-color:var(--border);">
+                    <h4>Absent Dates</h4>
+                    <p style="font-size:0.9rem;">12-10-2023, 14-11-2023</p>
+                    <h4 class="mt-3">On Duty Dates</h4>
+                    <p style="font-size:0.9rem;">05-09-2023 (Symposium)</p>
+                `;
+                this.openModal("My Attendance", html);
+            },
+
+            showStudentMarks(iatNum) {
+                // Check local storage for marks, otherwise show nothing updated
+                let marks = JSON.parse(localStorage.getItem(`iat_${iatNum}_${state.userYear}`)) || [];
+                let studentMarks = marks.filter(m => m.id === state.userId);
+                
+                let html = `<div class="table-responsive"><table><thead><tr><th>Subject</th><th>Internal (40)</th><th>Exam (60)</th><th>Total</th><th>Status</th></tr></thead><tbody>`;
+                
+                if(studentMarks.length === 0) {
+                    html += `<tr><td colspan="5" class="text-center">Results not published yet.</td></tr>`;
+                } else {
+                    studentMarks.forEach(sm => {
+                        html += `<tr>
+                            <td>${sm.subjName} (${sm.subjCode})</td>
+                            <td>${sm.internal}</td>
+                            <td>${sm.exam}</td>
+                            <td>${parseInt(sm.internal)+parseInt(sm.exam)}</td>
+                            <td><span class="badge ${sm.exam >= 30 ? 'bg-present':'bg-absent'}">${sm.exam >= 30 ? 'PASS':'FAIL'}</span></td>
+                        </tr>`;
+                    });
+                }
+                html += `</tbody></table></div>`;
+                this.openModal(`IAT-${iatNum} Results`, html);
+            },
+
+            // ================= ATTENDANCE (STAFF/HOD/PRINCI) =================
+            staffAttendancePage() {
+                let html = `
+                    <div class="form-group">
+                        <label>Select Year</label>
+                        <select id="stClass" class="form-control">
+                            <option>CSE 2nd Year</option>
+                            <option>CSE 3rd Year</option>
+                            <option>CSE 4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Session</label>
+                        <select id="stSession" class="form-control">
+                            <option>Morning</option>
+                            <option>Afternoon</option>
+                        </select>
+                    </div>
+                    <button class="btn mb-3" onclick="app.fetchStaffAttendanceList()">Fetch List</button>
+                    <div id="attnListContainer"></div>
+                `;
+                this.openModal("Take Attendance", html);
+            },
+
+            fetchStaffAttendanceList() {
+                let yr = document.getElementById('stClass').value;
+                let sess = document.getElementById('stSession').value;
+                let list = DB.students[yr];
+                
+                let html = `<h5>${yr} - ${sess}</h5>
+                    <div style="font-size:0.8rem; margin-bottom:10px;">Select to change status (Default: Present)</div>
+                    <div class="table-responsive">
+                    <table><thead><tr><th>ID</th><th>Name</th><th>Action</th></tr></thead><tbody>`;
+                
+                list.forEach(s => {
+                    html += `<tr>
+                        <td style="font-size:0.8rem">${s.id}</td>
+                        <td style="font-size:0.8rem">${s.name}</td>
+                        <td>
+                            <select class="form-control table-input attn-select" data-id="${s.id}" data-name="${s.name}" style="width:90px; color:var(--text-main); font-size:0.8rem;">
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                                <option value="OD">OD</option>
+                            </select>
+                        </td>
+                    </tr>`;
+                });
+                
+                html += `</tbody></table></div>
+                <button class="btn mt-3" onclick="app.submitStaffAttendance('${yr}','${sess}')">Submit Attendance</button>`;
+                document.getElementById('attnListContainer').innerHTML = html;
+            },
+
+            submitStaffAttendance(yr, sess) {
+                let selects = document.querySelectorAll('.attn-select');
+                let today = new Date().toISOString().split('T')[0];
+                let records = JSON.parse(localStorage.getItem('absent_records')) || {};
+                if(!records[today]) records[today] = [];
+
+                selects.forEach(sel => {
+                    if(sel.value !== 'Present') {
+                        // Avoid duplicates
+                        let exists = records[today].find(r => r.id === sel.getAttribute('data-id') && r.sess === sess);
+                        if(!exists) {
+                            records[today].push({
+                                id: sel.getAttribute('data-id'),
+                                name: sel.getAttribute('data-name'),
+                                class: yr,
+                                status: sel.value,
+                                sess: sess
+                            });
+                        }
+                    }
+                });
+
+                localStorage.setItem('absent_records', JSON.stringify(records));
+                alert("Attendance Submitted Successfully!");
+                this.closeModal();
+            },
+
+            hodAttendancePage() {
+                this.princiAttendancePage();
+            },
+
+            princiAttendancePage() {
+                let html = `
+                    <div class="form-group">
+                        <label>Select Date</label>
+                        <input type="date" id="viewAttnDate" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label>Select Year</label>
+                        <select id="viewAttnYear" class="form-control">
+                            <option value="All">All Years</option>
+                            <option>CSE 2nd Year</option>
+                            <option>CSE 3rd Year</option>
+                            <option>CSE 4th Year</option>
+                        </select>
+                    </div>
+                    <button class="btn mb-3" onclick="app.fetchDayAttendance()">View</button>
+                    <div id="hodAttnRes"></div>
+                `;
+                this.openModal("Attendance Overview", html);
+            },
+
+            fetchDayAttendance() {
+                let date = document.getElementById('viewAttnDate').value;
+                let yr = document.getElementById('viewAttnYear').value;
+                let records = JSON.parse(localStorage.getItem('absent_records')) || {};
+                let dayData = records[date] || [];
+
+                if(yr !== 'All') { dayData = dayData.filter(d => d.class === yr); }
+
+                if(dayData.length === 0) {
+                    document.getElementById('hodAttnRes').innerHTML = "<p>No absentees / OD reported.</p>";
+                    return;
+                }
+
+                let html = `<div class="table-responsive"><table><thead><tr><th>Class</th><th>Student</th><th>Status</th><th>Session</th></tr></thead><tbody>`;
+                dayData.forEach(d => {
+                    let badge = d.status === 'Absent' ? 'bg-absent' : 'bg-od';
+                    html += `<tr>
+                        <td>${d.class.replace('CSE ','').replace(' Year','')}</td>
+                        <td style="font-size:0.8rem">${d.name}<br><small>${d.id}</small></td>
+                        <td><span class="badge ${badge}">${d.status}</span></td>
+                        <td>${d.sess}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table></div>`;
+                document.getElementById('hodAttnRes').innerHTML = html;
+            },
+
+            // ================= TIMETABLE =================
+            showClassTimetable(yr) {
+                let tt = JSON.parse(localStorage.getItem(`timetable_${yr}`));
+                if(!tt) { this.openModal("Time Table", "<p>No time table uploaded yet.</p>"); return; }
+                
+                let html = `<div class="table-responsive"><table><thead><tr><th>Day</th>`;
+                for(let i=1; i<=8; i++) html += `<th>H${i}</th>`;
+                html += `</tr></thead><tbody>`;
+                
+                let days = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+                days.forEach(d => {
+                    html += `<tr><th>${d}</th>`;
+                    for(let i=1; i<=8; i++) {
+                        let cell = tt[`${d}_${i}`] || {subj:'', staff:''};
+                        html += `<td style="font-size:0.75rem;"><b>${cell.subj}</b><br><small>${cell.staff}</small></td>`;
+                    }
+                    html += `</tr>`;
+                });
+                html += `</tbody></table></div>`;
+                this.openModal(`${yr} Timetable`, html);
+            },
+
+            showAllTimetables() {
+                let html = `
+                    <div class="action-grid" style="grid-template-columns: 1fr;">
+                        <button class="btn btn-outline" onclick="app.showClassTimetable('CSE 2nd Year')">CSE 2nd Year</button>
+                        <button class="btn btn-outline" onclick="app.showClassTimetable('CSE 3rd Year')">CSE 3rd Year</button>
+                        <button class="btn btn-outline" onclick="app.showClassTimetable('CSE 4th Year')">CSE 4th Year</button>
+                    </div>
+                `;
+                this.openModal("View Timetables", html);
+            },
+
+            updateTimetablePage() {
+                let html = `
+                    <div class="form-group">
+                        <label>Select Year</label>
+                        <select id="ttYear" class="form-control" onchange="app.renderTimetableEditor()">
+                            <option value="">--Select--</option>
+                            <option>CSE 2nd Year</option>
+                            <option>CSE 3rd Year</option>
+                            <option>CSE 4th Year</option>
+                        </select>
+                    </div>
+                    <div id="ttEditor"></div>
+                `;
+                this.openModal("Update Time Table", html);
+            },
+
+            renderTimetableEditor() {
+                let yr = document.getElementById('ttYear').value;
+                if(!yr) { document.getElementById('ttEditor').innerHTML=''; return;}
+                
+                let exist = JSON.parse(localStorage.getItem(`timetable_${yr}`)) || {};
+                let days = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+                
+                let html = `<p class="mb-3 text-muted" style="font-size:0.8rem">Enter SubjCode/StaffName.</p><div class="table-responsive"><table><thead><tr><th>Day</th>`;
+                for(let i=1; i<=8; i++) html += `<th>H${i}</th>`;
+                html += `</tr></thead><tbody>`;
+
+                days.forEach(d => {
+                    html += `<tr><th>${d}</th>`;
+                    for(let i=1; i<=8; i++) {
+                        let cell = exist[`${d}_${i}`] || {subj:'', staff:''};
+                        html += `<td>
+                            <input type="text" class="form-control table-input mb-3" placeholder="Subj" id="tt_${d}_${i}_subj" value="${cell.subj}" style="min-width:60px;">
+                            <input type="text" class="form-control table-input" placeholder="Staff" id="tt_${d}_${i}_staff" value="${cell.staff}" style="min-width:60px;">
+                        </td>`;
+                    }
+                    html += `</tr>`;
+                });
+
+                html += `</tbody></table></div>
+                <button class="btn mt-3" onclick="app.saveTimetable('${yr}')">Save Timetable</button>
+                `;
+                document.getElementById('ttEditor').innerHTML = html;
+            },
+
+            saveTimetable(yr) {
+                let tt = {};
+                let days = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+                days.forEach(d => {
+                    for(let i=1; i<=8; i++) {
+                        tt[`${d}_${i}`] = {
+                            subj: document.getElementById(`tt_${d}_${i}_subj`).value,
+                            staff: document.getElementById(`tt_${d}_${i}_staff`).value
+                        };
+                    }
+                });
+                localStorage.setItem(`timetable_${yr}`, JSON.stringify(tt));
+                alert("Timetable Saved!");
+            },
+
+            // ================= IAT MARKS =================
+            staffIATPage(iatNum) {
+                let staffOps = DB.roles.staff.users.map(u => `<option>${u}</option>`).join('');
+                let html = `
+                    <div class="form-group"><label>Year</label><select id="iatYr" class="form-control"><option>CSE 2nd Year</option><option>CSE 3rd Year</option><option>CSE 4th Year</option></select></div>
+                    <div class="form-group"><label>Subject Code</label><input type="text" id="iatCode" class="form-control"></div>
+                    <div class="form-group"><label>Subject Name</label><input type="text" id="iatSubj" class="form-control"></div>
+                    <div class="form-group"><label>Staff Name</label><select id="iatStaff" class="form-control">${staffOps}</select></div>
+                    <button class="btn mb-3" onclick="app.fetchIatStudentList('${iatNum}')">Fetch Student List</button>
+                    <div id="iatList"></div>
+                `;
+                this.openModal(`Enter IAT-${iatNum}`, html);
+            },
+
+            fetchIatStudentList(iatNum) {
+                let yr = document.getElementById('iatYr').value;
+                let code = document.getElementById('iatCode').value;
+                let subj = document.getElementById('iatSubj').value;
+                let stf = document.getElementById('iatStaff').value;
+
+                if(!code || !subj) { alert("Fill subject details"); return; }
+
+                let list = DB.students[yr];
+                let existing = JSON.parse(localStorage.getItem(`iat_${iatNum}_${yr}`)) || [];
+                
+                let html = `<div class="table-responsive"><table><thead><tr><th>ID/Name</th><th>Internal<br>(Max 40)</th><th>Exam<br>(Max 60)</th><th>Total<br>(Max 100)</th></tr></thead><tbody>`;
+
+                list.forEach(s => {
+                    let rec = existing.find(x => x.id === s.id && x.subjCode === code) || {internal:40, exam:''};
+                    let tot = rec.exam !== '' ? parseInt(rec.internal) + parseInt(rec.exam) : rec.internal;
+                    html += `<tr>
+                        <td style="font-size:0.75rem">${s.id}<br>${s.name}</td>
+                        <td><input type="number" id="int_${s.id}" class="form-control table-input" value="${rec.internal}" style="width:60px" oninput="app.updateIatTotal('${s.id}')"></td>
+                        <td><input type="number" id="exam_${s.id}" class="form-control table-input iat-exam-val" placeholder="/60" value="${rec.exam}" style="width:60px" oninput="app.updateIatTotal('${s.id}')"></td>
+                        <td id="tot_${s.id}" style="font-weight:bold; font-size:1.1rem; text-align:center;">${tot}</td>
+                    </tr>`;
+                });
+
+                html += `</tbody></table></div>
+                <button class="btn mt-3" onclick="app.submitIatMarks('${iatNum}','${yr}','${code}','${subj}','${stf}')">Submit Marks</button>`;
+                document.getElementById('iatList').innerHTML = html;
+            },
+
+            updateIatTotal(id) {
+                let intVal = parseInt(document.getElementById(`int_${id}`).value) || 0;
+                let exVal = parseInt(document.getElementById(`exam_${id}`).value) || 0;
+                let totCell = document.getElementById(`tot_${id}`);
+                let tot = intVal + exVal;
+                totCell.innerText = tot;
+                if(tot >= 70 && exVal >= 30) { totCell.style.color = "var(--secondary)"; }
+                else { totCell.style.color = "var(--error)"; }
+            },
+
+            submitIatMarks(iatNum, yr, code, subj, stf) {
+                let list = DB.students[yr];
+                let allRecs = JSON.parse(localStorage.getItem(`iat_${iatNum}_${yr}`)) || [];
+                
+                // remove old records for this subject
+                allRecs = allRecs.filter(x => x.subjCode !== code);
+
+                let passCount = 0;
+                list.forEach(s => {
+                    let inter = parseInt(document.getElementById(`int_${s.id}`).value) || 0;
+                    let exam = parseInt(document.getElementById(`exam_${s.id}`).value) || 0;
+                    allRecs.push({
+                        id: s.id, name: s.name, subjCode: code, subjName: subj, staff: stf, internal: inter, exam: exam
+                    });
+                    if((inter + exam) >= 70 && exam >= 30) passCount++;
+                });
+
+                localStorage.setItem(`iat_${iatNum}_${yr}`, JSON.stringify(allRecs));
+                
+                // Show summary
+                let failCount = list.length - passCount;
+                alert(`Marks Submitted!\nTotal Students: ${list.length}\nPassed: ${passCount}\nFailed: ${failCount}`);
+                this.closeModal();
+            },
+
+            hodIatOverview() {
+                let html = `
+                    <div class="form-group"><label>IAT</label><select id="oIatNum" class="form-control"><option value="1">IAT 1</option><option value="2">IAT 2</option></select></div>
+                    <div class="form-group"><label>Year</label><select id="oIatYr" class="form-control"><option>CSE 2nd Year</option><option>CSE 3rd Year</option><option>CSE 4th Year</option></select></div>
+                    <button class="btn mb-3" onclick="app.generateIatReport()">Generate Report</button>
+                    <div id="iatReportBody"></div>
+                `;
+                this.openModal("IAT Overall Report", html);
+            },
+
+            generateIatReport() {
+                let num = document.getElementById('oIatNum').value;
+                let yr = document.getElementById('oIatYr').value;
+                let recs = JSON.parse(localStorage.getItem(`iat_${num}_${yr}`)) || [];
+                
+                if(recs.length === 0) { document.getElementById('iatReportBody').innerHTML = "<p>No data submitted yet.</p>"; return;}
+
+                // Group by student
+                let stMap = {};
+                let subjects = {};
+                recs.forEach(r => {
+                    if(!stMap[r.id]) stMap[r.id] = {name: r.name, marks: {}};
+                    let tot = parseInt(r.internal) + parseInt(r.exam);
+                    let status = (parseInt(r.exam) >= 30 && tot >= 70) ? 'PASS' : 'FAIL';
+                    stMap[r.id].marks[r.subjCode] = {tot: tot, stat: status};
+                    subjects[r.subjCode] = r.subjName;
+                });
+
+                let subjKeys = Object.keys(subjects);
+                let html = `<div class="table-responsive"><table><thead><tr><th>ID/Name</th>`;
+                subjKeys.forEach(sk => { html += `<th>${sk}<br><small style="font-weight:normal">${subjects[sk]}</small></th>`; });
+                html += `</tr></thead><tbody>`;
+
+                for(let sid in stMap) {
+                    html += `<tr><td style="font-size:0.75rem">${sid}<br>${stMap[sid].name}</td>`;
+                    subjKeys.forEach(sk => {
+                        let m = stMap[sid].marks[sk];
+                        if(m) {
+                             html += `<td>${m.tot}<br><span style="font-size:0.6rem; font-weight:bold; color:${m.stat==='PASS'?'var(--secondary)':'var(--error)'}">${m.stat}</span></td>`;
+                        } else {
+                             html += `<td>-</td>`;
+                        }
+                    });
+                    html += `</tr>`;
+                }
+
+                html += `</tbody></table></div>`;
+                document.getElementById('iatReportBody').innerHTML = html;
+            },
+
+            // ================= REPORT TABS (COMMON) =================
+            renderReportTable() {
+                let cls = document.getElementById('reportClassFilter').value;
+                let date = new Date().toISOString().split('T')[0];
+                let records = JSON.parse(localStorage.getItem('absent_records')) || {};
+                let tod = records[date] || [];
+                
+                tod = tod.filter(t => t.class === cls);
+                
+                let tb = document.querySelector('#reportTable tbody');
+                tb.innerHTML = '';
+                
+                if(tod.length === 0) {
+                    tb.innerHTML = '<tr><td colspan="3" class="text-center">No absentees reported.</td></tr>';
+                } else {
+                    tod.forEach(t => {
+                        let badge = t.status === 'Absent' ? 'bg-absent' : 'bg-od';
+                        tb.innerHTML += `<tr><td>${t.id}</td><td style="font-size:0.85rem">${t.name}</td><td><span class="badge ${badge}">${t.status}</span></td></tr>`;
+                    });
+                }
+                
+                // Email Setup
+                let storedEmail = state.email || localStorage.getItem('user_gmail') || '';
+                document.getElementById('fromEmail').value = storedEmail.length > 0 ? storedEmail : "Not configured in settings";
+            },
+
+            sendEmailReport() {
+                let to = document.getElementById('toEmail').value;
+                if(!to) { alert("Please enter To Email"); return;}
+                
+                let cls = document.getElementById('reportClassFilter').value;
+                let date = new Date().toISOString().split('T')[0];
+                let records = JSON.parse(localStorage.getItem('absent_records')) || {};
+                let tod = records[date] || [];
+                tod = tod.filter(t => t.class === cls);
+
+                let body = `Attendance Report for ${cls} on ${date}%0D%0A%0D%0A`;
+                if(tod.length===0) body += "No absentees reported.";
+                else {
+                    tod.forEach(t => {
+                        body += `${t.id} - ${t.name} - ${t.status}%0D%0A`;
+                    });
+                }
+                
+                let mailto = `mailto:${to}?subject=Absentees Report - ${cls}&body=${body}`;
+                window.location.href = mailto;
+            },
+
+            // ================= SETTINGS =================
+            setupSettings() {
+                document.getElementById('profName').value = state.userName;
+                
+                if(state.userRole !== 'Student') {
+                    document.getElementById('grpRegNo').classList.add('hidden');
+                    document.getElementById('grpYear').classList.add('hidden');
+                } else {
+                    document.getElementById('profId').value = state.userId;
+                    document.getElementById('profYear').value = state.userYear;
+                }
+                
+                document.getElementById('profEmail').value = localStorage.getItem('user_gmail') || '';
+            },
+
+            saveProfile() {
+                let email = document.getElementById('profEmail').value;
+                localStorage.setItem('user_gmail', email);
+                state.email = email;
+                alert("Profile Saved!");
+                app.renderReportTable(); // Update email in reports tab
+            },
+
+            toggleTheme() {
+                let isDark = document.getElementById('themeToggle').checked;
+                if(isDark) {
+                    document.body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                }
+            },
+
+            // ================= MODAL UTILS =================
+            openModal(title, bodyHtml) {
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalBody').innerHTML = bodyHtml;
+                document.getElementById('dataModal').classList.remove('hidden');
+            },
+            closeModal() {
+                document.getElementById('dataModal').classList.add('hidden');
+            }
+        };
+
+        // Initialize App
+        window.onload = app.init;
+    </script>
+</body>
+</html>

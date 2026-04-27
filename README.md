@@ -1,4 +1,4 @@
-## 🎓 MPNMJEC Attendance System
+# 🎓 MPNMJEC Attendance System
 
 **M.P. Nachimuthu M. Jaganadhan Engineering College**
 Erode-Chennimalai Rd, Erode, Tamil Nadu 638112
@@ -70,7 +70,7 @@ A **mobile-friendly web application** for managing student attendance, IAT marks
 ## 🔐 Login Credentials
 
 | Role | Username | Password |
-
+|---|---|---|
 | Student | Register Number (e.g. 731724104001) | cc2cse |
 | Staff | e.g. d.suganthi | 235689 |
 | HOD | k.n.sivakumar | hod@cse |
@@ -161,5 +161,4 @@ This project is developed for **MPNMJEC College** internal use only.
 - Font Awesome Icons
 - Vercel Hosting
 - Google Fonts
-- 
-- 
+  

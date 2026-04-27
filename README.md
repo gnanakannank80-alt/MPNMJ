@@ -1,114 +1,165 @@
-# 📱 MPNMJEC Student Attendance System
+## 🎓 MPNMJEC Attendance System
 
+**M.P. Nachimuthu M. Jaganadhan Engineering College**
+Erode-Chennimalai Rd, Erode, Tamil Nadu 638112
 
-📌 Project Overview
+---
 
-The MPNMJEC Student Attendance System is a mobile/web application designed to manage student attendance efficiently for
-M.P. Nachimuthu M. Jaganadhan Engineering College.
+## 🌐 Live Demo
+🔗 [mpnmj.vercel.app](https://mpnmj.vercel.app)
 
-This application helps faculty to:
+---
 
-Mark student attendance easily
-Track absent students
-Generate daily reports
-Send reports using Gmail
+## 📌 Project Overview
 
-🚀 Features
+A **mobile-friendly web application** for managing student attendance, IAT marks, and timetables for the CSE Department of MPNMJEC. Built with pure HTML, CSS, and JavaScript — powered by Firebase Realtime Database for real-time cloud sync across all devices.
 
-🔐 Login System
-Login using:
-Gmail ID
-Mobile Number
-Password (default: 235689)
-Automatically saves user credentials
+---
 
-🏠 Home Page
+## 🛠️ Tech Stack
 
-Displays:
-College Name
-College Address
-Options:
-CSE 2nd Year
-CSE 3rd Year
+| Layer | Technology |
+|---|---|
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
+| **Database** | Firebase Realtime Database |
+| **Hosting** | Vercel |
+| **Icons** | Font Awesome 6 |
+| **Fonts** | Google Fonts (Inter) |
 
-📋 Student Attendance Management
+---
 
-View student list
-Search students 🔍
-Add new student ➕
-Edit student details ✏️
-Delete student (password required) 🔒
-Attendance options:
-✅ Present (default)
-❌ Absent
-Submit attendance:
-Redirects to Report Page
+## ✨ Features
 
-📊 Report Page
+### 👨‍🎓 Student
+- View personal attendance percentage with circular chart
+- View IAT-1 and IAT-2 marks with Pass/Fail status
+- View class timetable
 
-Displays:
-📅 Today’s absent student list
-Features:
-Gmail ID auto-filled
-Attendance report generation
-📩 Send Report (Gmail Integration)
-When clicking Send Report:
-Opens Gmail application
-Pre-fills:
-Subject: Today's Attendance Report
-Body: List of absent students
-User can:
-Enter recipient email
-Send the report manually
+### 👩‍🏫 Staff
+- Take attendance (Morning / Afternoon sessions)
+- Mark students as Present / Absent / OD
+- Enter IAT-1 and IAT-2 marks for any subject
+- View class timetable
 
-⚙️ Settings Page
+### 👨‍💼 HOD
+- View attendance overview by date and class
+- Update class timetables
+- View IAT overall report for all students
 
-Manage profile:
-Faculty Name
-Department
-Year
-Mobile Number (auto-filled)
-Gmail ID (auto-filled)
-Preferences:
-Light Mode
-Dark Mode
-Logout option available
+### 🏛️ Principal
+- View all attendance across classes and dates
+- View timetables for all years
+- View IAT reports
 
-🔻 Navigation
+### ⚙️ Common
+- Dark Mode toggle
+- Email absentee report via Gmail
+- Real-time sync across all devices (Firebase)
+- Mobile-first responsive design
 
-Available on all pages:
+---
 
-Home
-Report
-Settings
+## 🏫 Classes Supported
 
-🛠️ Technologies Used
+- CSE 2nd Year (51 Students)
+- CSE 3rd Year
+- CSE 4th Year
 
-Frontend: HTML, CSS, JavaScript (or Flutter / React Native)
-Storage: Local Storage / Firebase (optional)
-Email Integration: Gmail (mailto: method)
+---
 
-📌 How It Works
+## 🔐 Login Credentials
 
-User logs in
-Selects department and year
-Marks attendance
-Submits attendance
-Views absent students
-Sends report via Gmail
+| Role | Username | Password |
 
-🔮 Future Enhancements
+| Student | Register Number (e.g. 731724104001) | cc2cse |
+| Staff | e.g. d.suganthi | 235689 |
+| HOD | k.n.sivakumar | hod@cse |
+| Principal | dr.ramesh | mpnmj@cse |
 
-Firebase database integration
-Automatic email sending (EmailJS)
-PDF report generation
-Admin dashboard
-Multi-department support
+---
 
-👨‍💻 Author
+## 🔥 Firebase Structure
 
-Gnanakannan K
+```
+Firebase Realtime Database
+├── attendance/
+│   └── {date}/
+│       └── {class}/
+│           └── {session}/
+│               └── {studentId}: { name, status, sess, date }
+├── iat_marks/
+│   └── {iat_year}/
+│       └── {subjectCode}/
+│           └── {studentId}: { name, internal, exam, subjName }
+└── timetables/
+    └── {class}/
+        └── {Day_Hour}: { subj, staff }
+```
 
-📄 License
+---
 
-This project is developed for educational purposes only.
+## 📁 Project Structure
+
+```
+mpnmjec-attendance/
+├── index.html       # Main app (Frontend + Firebase logic)
+├── style.css        # Styles + Dark mode + Responsive
+└── README.md        # Project documentation
+```
+
+---
+
+## 🚀 How to Deploy
+
+### 1. Clone / Download
+```bash
+git clone https://github.com/yourusername/mpnmjec-attendance.git
+```
+
+### 2. Firebase Setup
+- Go to [console.firebase.google.com](https://console.firebase.google.com)
+- Create project → Enable Realtime Database
+- Copy your config and paste in `index.html`
+
+### 3. Deploy to Vercel
+- Push to GitHub
+- Import repo in [vercel.com](https://vercel.com)
+- Deploy ✅
+
+---
+
+## 📱 Screenshots
+
+> Mobile-first design — works on any device!
+
+- Login Page with Role Selection
+- Student Dashboard with Attendance Chart
+- Staff Attendance Taking Page
+- HOD Attendance Overview
+- IAT Marks Entry & Report
+
+---
+
+## 👨‍💻 Developer Notes
+
+- No separate backend server needed — Firebase SDK handles all database operations directly
+- Data syncs in real-time across all devices
+- localStorage used only for session management and theme preference
+- All passwords should be changed before production use
+
+---
+
+## 📄 License
+
+This project is developed for **MPNMJEC College** internal use only.
+
+---
+
+## 🙏 Acknowledgements
+
+- Firebase by Google
+- Font Awesome Icons
+- Vercel Hosting
+- Google Fonts
+- 
+- 
